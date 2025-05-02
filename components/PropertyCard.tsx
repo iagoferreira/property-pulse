@@ -6,47 +6,20 @@ import {
   FaRulerCombined,
   FaMoneyBill,
   FaMapMarker
-} from "react-icons/fa"
-
-type Property = {
-  _id: string;
-  owner: string;
-  name: string;
-  type: string;
-  description: string;
-  location: {
-    street: string;
-    city: string;
-    state: string;
-    zipcode: string;
-  };
-  beds: number;
-  baths: number;
-  square_feet: number;
-  amenities: string[];
-  rates: {
-    nightly?: number;
-    weekly?: number;
-    monthly?: number;
-  };
-  seller_info: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  images: string[];
-  is_featured: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+} from "react-icons/fa";
+import { IProperty } from "@/models/Property";
 
 const PropertyCard = ({
   property
 }: {
-  property: Property
+  property: IProperty
 }) => {
   const getRateDisplay = () => {
     const { rates } = property;
+
+    if (rates === undefined) {
+      return "Rate Not Available";
+    };
 
     if (rates.monthly) {
       return `$${rates.monthly.toLocaleString()}/mo`;

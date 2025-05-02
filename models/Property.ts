@@ -1,4 +1,36 @@
-import {Schema, model, models} from "mongoose"
+import {Schema, model, models, Document, Model} from "mongoose"
+
+export interface IProperty extends Document {
+  _id: string;
+  owner: Schema.Types.ObjectId;
+  name: string;
+  type: string;
+  description?: string;
+  location: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipcode?: string;
+  };
+  beds: number;
+  baths: number;
+  square_feet: number;
+  amenities: string[];
+  rates?: {
+    nightly?: number;
+    weekly?: number;
+    monthly?: number;
+  };
+  seller_info?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  images: string[];
+  is_featured: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 const propertySchema = new Schema({
   owner: {
@@ -63,6 +95,6 @@ const propertySchema = new Schema({
   timestamps: true
 });
 
-const Property = models.Property || model('Property', propertySchema);
+const Property: Model<IProperty> = models.Property || model<IProperty>("Property", propertySchema);
 
 export default Property;
