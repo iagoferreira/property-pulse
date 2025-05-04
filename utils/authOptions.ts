@@ -1,4 +1,14 @@
 import GoogleProvider from "next-auth/providers/google";
+import connectDB from "@/config/database";
+import User, {IUser} from "@/models/User";
+import { type Profile, DefaultSession } from "next-auth";
+import { type GoogleProfile } from "next-auth/providers/google";
+
+interface SessionWithId extends DefaultSession {
+  user: DefaultSession["user"] & {
+    id: string;
+  };
+}
 
 export const authOptions = {
   providers: [
@@ -15,18 +25,54 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    // invoked on successful sign in
-    async signIn() {
-      // 1. connect to db
-      // 2. check if user exists
-      // 3. if not, create new user
-      // 4. return true to allow sign in
+    async signIn({
+      profile
+    }: {
+      profile?: Profile | undefined
+    }): Promise<boolean> {
+      if (profile === undefined) {
+        console.error("Invalid profile");
+        return false;
+      }
+
+      const googleProfile = profile as GoogleProfile;
+
+      await connectDB();
+
+      const userExists: IUser | null = await User.findOne({email: profile.email});
+
+      if (userExists === null) {
+        await User.create({
+          email: googleProfile.email,
+          username: googleProfile.name.slice(0, 20),
+          image: googleProfile.picture
+       });
+      }
+
+      return true;
     },
-    // session callback function that modifies the session object
-    async session() {
-      // 1. get user from db
-      // 2. assign user id from the session
-      // 3. return session
-    },
+    async session({
+      session
+    }: {
+      session: DefaultSession
+    }): Promise<DefaultSession | SessionWithId> {
+      if (session.user === undefined) {
+        return session;
+      }
+
+      const user: IUser | null = await User.findOne({email: session.user.email});
+
+      if (user === null) {
+        return session;
+      }
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user._id.toString(),
+        },
+      };;
+    }
   }
 };

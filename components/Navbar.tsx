@@ -24,11 +24,13 @@ type Providers = Record<string, {
 
 const Navbar = () => {
   const { data: session } = useSession();
+  const pathname = usePathname();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
   const [providers, setProviders] = useState<Providers | null>(null);
 
-  const pathname = usePathname();
+  const profileImage = session?.user?.image || profileDefault;
 
   useEffect(() => {
     const setAuthProviders = async () => {
@@ -41,8 +43,6 @@ const Navbar = () => {
 
     setAuthProviders();
   }, []);
-
-  console.log(providers);
 
   return (
     <nav className="bg-blue-700 border-b border-blue-500">
@@ -185,7 +185,9 @@ const Navbar = () => {
                     <span className="sr-only">Open user menu</span>
                     <Image
                       className="h-8 w-8 rounded-full"
-                      src={profileDefault}
+                      src={profileImage}
+                      width={40}
+                      height={40}
                       alt=""
                     />
                   </button>
@@ -224,6 +226,10 @@ const Navbar = () => {
                       role="menuitem"
                       tabIndex={-1}
                       id="user-menu-item-2"
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        signOut();
+                      }}
                     >
                       Sign Out
                     </button>
